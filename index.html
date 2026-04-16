@@ -1,35 +1,287 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>MBTI测试展示</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI 深度导航站</title>
+    <style>
+    :root {
+      --bg: #f0f4fb;
+      --panel: #ffffff;
+      --text: #1a1e2e;
+      --muted: #6b7280;
+      --line: #d4dce8;
+      --soft: #e8eef8;
+      --accent: #5b7fc7;
+      --accent-strong: #3b5998;
+      --gold: #e6ac00;
+      --gold-soft: #fff8e0;
+      --anemo: #74c2a8;
+      --pyro: #ef7a56;
+      --hydro: #4fc1e8;
+      --electro: #9b7fd4;
+      --cryo: #a0d2e7;
+      --dendro: #7bb662;
+      --geo: #f0c75e;
+      --shadow: 0 16px 40px rgba(59, 89, 152, 0.10);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top left, #eef3fc 0, #f0f4fb 36%, #e8ecf5 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .shell { max-width: 980px; margin: 0 auto; padding: 24px 16px 56px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .hero {
+      padding: 28px; margin-top: 20px; overflow: hidden; position: relative;
+    }
+    .hero::after {
+      content: ""; position: absolute; right: -60px; top: -60px;
+      width: 180px; height: 180px; border-radius: 50%;
+      background: linear-gradient(180deg, rgba(91, 127, 199, 0.18), rgba(91, 127, 199, 0.02));
+      pointer-events: none;
+    }
+    h1, h2, h3, p { margin: 0; }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px); line-height: 1.08; letter-spacing: -0.03em;
+      max-width: 680px;
+      background: linear-gradient(135deg, var(--accent-strong), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-minimal {
+      min-height: 48vh; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center; padding: 42px 20px;
+    }
+    .hero-minimal::after { display: none; }
+    .hero-minimal h1 { max-width: none; margin: 0; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+    .hero-actions-single { justify-content: center; margin-top: 28px; }
+    .hero-subtitle { font-size: 16px; color: var(--muted); margin-top: 12px; line-height: 1.7; }
+    .hero-info {
+      margin-top: 18px; font-size: 13px; color: var(--muted);
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    button {
+      border: 0; cursor: pointer;
+      transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+      font: inherit;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:disabled { cursor: not-allowed; opacity: 0.55; transform: none; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-strong), #5271b8);
+      color: #fff; padding: 14px 24px; border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(59, 89, 152, 0.22); font-weight: 700; font-size: 16px;
+    }
+    .btn-secondary {
+      background: #fff; color: var(--accent-strong); padding: 14px 20px;
+      border-radius: 14px; border: 1px solid var(--line); font-weight: 700;
+    }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .test-wrap, .result-wrap { margin-top: 22px; padding: 22px; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 16px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .progress {
+      flex: 1; min-width: 240px; height: 10px;
+      background: #e4eaf4; border-radius: 999px; overflow: hidden;
+    }
+    .progress > span {
+      display: block; width: 0; height: 100%;
+      background: linear-gradient(90deg, var(--hydro), var(--accent-strong));
+      border-radius: inherit; transition: width .22s ease;
+    }
+    .progress-text { color: var(--muted); font-size: 13px; white-space: nowrap; }
+    .question-list { display: grid; gap: 16px; }
+    .question {
+      border: 1px solid var(--line); border-radius: 18px; padding: 18px;
+      background: linear-gradient(180deg, #ffffff, #fafcff);
+    }
+    .question-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; margin-bottom: 10px; color: var(--muted); font-size: 12px;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      border-radius: 999px; padding: 6px 10px;
+      background: var(--soft); border: 1px solid var(--line);
+    }
+    .question-title { font-size: 16px; line-height: 1.7; white-space: pre-wrap; }
+    .options { display: grid; gap: 10px; margin-top: 14px; }
+    .option {
+      display: flex; align-items: flex-start; gap: 12px; padding: 14px;
+      border-radius: 14px; border: 1px solid var(--line); background: #fff;
+      transition: border-color .16s ease, background .16s ease; cursor: pointer;
+    }
+    .option:hover { border-color: #b0c4e8; background: #f5f8ff; }
+    .option input { margin-top: 3px; accent-color: var(--accent-strong); transform: scale(1.1); flex-shrink: 0; }
+    .option-code { font-weight: 800; color: var(--accent-strong); min-width: 22px; }
+    .actions-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; flex-wrap: wrap; margin-top: 18px; padding-top: 6px;
+    }
+    .hint { color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .result-layout { display: grid; gap: 18px; }
+    .result-top { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: stretch; }
+    .type-box, .analysis-box, .dim-box, .note-box {
+      border: 1px solid var(--line); border-radius: 18px; padding: 18px;
+      background: linear-gradient(180deg, #ffffff, #fafcff);
+    }
+    .type-kicker { font-size: 12px; color: var(--accent-strong); margin-bottom: 8px; letter-spacing: .06em; }
+    .type-name { font-size: clamp(30px, 5vw, 48px); line-height: 1.08; letter-spacing: -0.03em; }
+    .type-subname { margin-top: 10px; color: var(--muted); font-size: 14px; line-height: 1.8; }
+    .match {
+      margin-top: 18px; display: inline-flex; align-items: center; gap: 8px;
+      border-radius: 999px; padding: 10px 14px; background: var(--soft);
+      border: 1px solid var(--line); color: var(--accent-strong); font-weight: 700; font-size: 14px;
+    }
+    .poster-box {
+      border: 1px solid var(--line); border-radius: 18px;
+      background: linear-gradient(180deg, #ffffff, #fafcff);
+      overflow: hidden; position: relative;
+      display: flex; flex-direction: column;
+      min-height: 320px;
+    }
+    .poster-img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block; border-radius: 18px;
+      filter: contrast(1.08) saturate(1.1);
+      transition: transform 0.4s ease;
+    }
+    .poster-box:hover .poster-img { transform: scale(1.03); }
+    .poster-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 16px 18px;
+      background: linear-gradient(0deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%);
+      border-radius: 0 0 18px 18px;
+    }
+    .poster-element {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.18); backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 999px; padding: 6px 14px;
+      color: #fff; font-size: 14px; font-weight: 700;
+    }
+    .poster-element-icon { font-size: 18px; }
+    .analysis-box h3, .dim-box h3, .note-box h3 { font-size: 16px; margin-bottom: 12px; }
+    .analysis-box p { margin: 0; color: #2a3040; font-size: 15px; line-height: 1.9; white-space: pre-wrap; }
+    .dim-list { display: grid; gap: 12px; }
+    .dim-item { border: 1px solid var(--line); border-radius: 16px; padding: 14px; background: #fff; }
+    .dim-item-top {
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: 10px; margin-bottom: 8px; flex-wrap: wrap;
+    }
+    .dim-item-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .dim-item-score { color: var(--accent-strong); font-weight: 800; font-size: 14px; white-space: nowrap; }
+    .dim-item p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+    .note-box p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+    .result-actions {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; flex-wrap: wrap; margin-top: 22px;
+    }
+    details.author-box {
+      border: 1px solid var(--line); border-radius: 18px;
+      background: linear-gradient(180deg, #ffffff, #fbfdfb); overflow: hidden;
+    }
+    .author-box summary {
+      list-style: none; cursor: pointer; padding: 18px; font-size: 16px;
+      font-weight: 700; color: var(--text); display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+    }
+    .author-box summary::-webkit-details-marker { display: none; }
+    .author-box summary::after {
+      content: '展开'; font-size: 12px; font-weight: 700; color: var(--accent-strong);
+      border: 1px solid var(--line); background: var(--soft);
+      padding: 6px 10px; border-radius: 999px; flex-shrink: 0;
+    }
+    .author-box[open] summary::after { content: '收起'; }
+    .author-content { border-top: 1px solid var(--line); padding: 0 18px 18px; }
+    .author-content p { margin: 14px 0 0; color: #2a3040; font-size: 14px; line-height: 1.9; }
+    @media (max-width: 860px) { .result-top { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) {
+      .shell { padding: 14px 12px 42px; }
+      .hero, .test-wrap, .result-wrap { padding: 16px; }
+      .hero h1 { font-size: 32px; }
+      .question-title { font-size: 15px; }
+    }
+        /* 针对导航页微调的补充样式 */
+        .nav-grid { display: grid; gap: 24px; margin-top: 24px; }
+        .category-title { 
+            font-size: 18px; font-weight: 800; color: var(--accent-strong); 
+            margin: 32px 0 16px; display: flex; align-items: center; gap: 8px;
+        }
+        .link-card {
+            display: flex; flex-direction: column; padding: 20px;
+            transition: all 0.2s ease; cursor: pointer; text-decoration: none;
+        }
+        .link-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .link-name { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+        .link-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+        .tag { font-size: 10px; padding: 2px 8px; border-radius: 6px; background: var(--soft); color: var(--accent-strong); margin-left: 8px; }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>MBTI测试类型展示</h1>
-  </header>
 
-  <main>
-    <section class="intro">
-      <button id="startBtn">开始测试</button>
-      
-      <button id="noticeBtn">注意事项</button>
-    </section>
-  </main>
+<div class="shell">
+    <header class="card hero">
+        <h1>MBTI <br>人格导航索引</h1>
+        <p class="hero-subtitle">聚合第三方专业测试、荣格八维解析及特殊变体工具。</p>
+        <div class="hero-info">
+            <span>数据源：m.json</span>
+            <span>更新时间：2026.04</span>
+        </div>
+    </header>
 
-  <footer>
-    <p>© 2026 MBTI测试展示</p>
-  </footer>
-
-  <!-- 弹窗容器 -->
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <span id="closeBtn" class="close">&times;</span>
-      <div id="modalBody"></div>
+    <div id="main-content">
+        <div id="loading" style="padding: 40px; text-align: center; color: var(--muted);">正在初始化导航矩阵...</div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
+    <footer style="margin-top: 60px; text-align: center; font-size: 13px; color: var(--muted);">
+        <p>© 2026 MBTI Portal. 探索心智的无限可能。</p>
+    </footer>
+</div>
+
+<script>
+    async function initNav() {
+        const container = document.getElementById('main-content');
+        try {
+            const response = await fetch('m.json');
+            const data = await response.json();
+            
+            let html = '';
+            data.categories.forEach(cat => {
+                html += `<h2 class="category-title">${cat.title}</h2>`;
+                html += `<div class="nav-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">`;
+                
+                cat.links.forEach(link => {
+                    html += `
+                        <a href="${link.url}" target="_blank" class="card link-card">
+                            <div class="link-name">${link.name} ${link.tag ? `<span class="tag">${link.tag}</span>` : ''}</div>
+                            <div class="link-desc">${link.desc}</div>
+                        </a>
+                    `;
+                });
+                html += `</div>`;
+            });
+            
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = `<div class="card test-wrap">❌ 加载失败，请检查 m.json 是否在同一目录下。</div>`;
+        }
+    }
+    initNav();
+</script>
 </body>
 </html>
