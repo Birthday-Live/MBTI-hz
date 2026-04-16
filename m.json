@@ -1,0 +1,25 @@
+{
+  "categories": [
+    {
+      "title": "🧩 核心八维测试",
+      "links": [
+        { "name": "Sakinorva", "url": "https://www.idrlabs.com/death-note/test.php", "desc": "最经典的八维权重测试，适合进阶学者。", "tag": "推荐" },
+        { "name": "Michael Caloz", "url": "https://www.michaelcaloz.com/personality/", "desc": "交互体验最好的逻辑测试。", "tag": "高精度" }
+      ]
+    },
+    {
+      "title": "🎨 视觉与趣味变体",
+      "links": [
+        { "name": "Personality Database", "url": "https://www.personality-database.com/", "desc": "查询虚构人物与真人的 MBTI 类型。", "tag": "数据库" },
+        { "name": "IDRLabs", "url": "https://www.idrlabs.com/cn/tests.php", "desc": "各种混搭风格的性格原型分析。", "tag": "多维度" }
+      ]
+    },
+    {
+      "title": "🧩 整活测试",
+      "links": [
+        { "name": "BAIE", "url": "https://mbti.chisato.org.cn/ba", "desc": "在“蔚蓝档案”的世界中，看看你是什么类型？", "tag": "推荐" },
+        { "name": "YSTI", "url": "https://ystest.20110202.top", "desc": "在“原神”的世界中，看看你是什么类型？", "tag": "高精度" }
+      ]
+    },
+  ]
+}
